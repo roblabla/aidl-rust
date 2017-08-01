@@ -60,9 +60,11 @@ cc_library_host_static {
         "aidl_language_y.yy",
         "ast_cpp.cpp",
         "ast_java.cpp",
+        "ast_rust.cpp",
         "code_writer.cpp",
         "generate_cpp.cpp",
         "generate_java.cpp",
+        "generate_rust.cpp",
         "generate_java_binder.cpp",
         "import_resolver.cpp",
         "line_reader.cpp",
@@ -70,6 +72,7 @@ cc_library_host_static {
         "options.cpp",
         "type_cpp.cpp",
         "type_java.cpp",
+        "type_rust.cpp",
         "type_namespace.cpp",
     ],
 }
@@ -90,6 +93,17 @@ cc_binary_host {
     name: "aidl-cpp",
     defaults: ["aidl_defaults"],
     srcs: ["main_cpp.cpp"],
+    static_libs: [
+        "libaidl-common",
+        "libbase",
+    ],
+}
+
+// aidl-rust executable
+cc_binary_host {
+    name: "aidl-rust",
+    defaults: ["aidl_defaults"],
+    srcs: ["main_rust.cpp"],
     static_libs: [
         "libaidl-common",
         "libbase",

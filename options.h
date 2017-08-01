@@ -102,6 +102,39 @@ class CppOptions final {
   DISALLOW_COPY_AND_ASSIGN(CppOptions);
 };
 
+class RustOptions final {
+ public:
+
+  ~RustOptions() = default;
+
+  // Parses the command line and returns a non-null pointer to an RustOptions
+  // object on success.
+  // Prints the usage statement on failure.
+  static std::unique_ptr<RustOptions> Parse(int argc, const char* const* argv);
+
+  std::string InputFileName() const { return input_file_name_; }
+  //std::string OutputHeaderDir() const { return output_header_dir_; }
+  std::string OutputRustFilePath() const { return output_file_name_; }
+
+  std::vector<std::string> ImportPaths() const { return import_paths_; }
+  std::string DependencyFilePath() const { return dep_file_name_; }
+  bool DependencyFileNinja() const { return dep_file_ninja_; }
+
+ private:
+  RustOptions() = default;
+
+  std::string input_file_name_;
+  std::vector<std::string> import_paths_;
+  std::string output_header_dir_;
+  std::string output_file_name_;
+  std::string dep_file_name_;
+  bool dep_file_ninja_{false};
+
+  //FRIEND_TEST(RustOptionsTests, ParsesCompileCpp);
+  //FRIEND_TEST(RustOptionsTests, ParsesCompileCppNinja);
+  DISALLOW_COPY_AND_ASSIGN(RustOptions);
+};
+
 bool EndsWith(const std::string& str, const std::string& suffix);
 bool ReplaceSuffix(const std::string& old_suffix,
                    const std::string& new_suffix,

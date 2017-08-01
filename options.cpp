@@ -269,7 +269,71 @@ bool ReplaceSuffix(const string& old_suffix,
   return true;
 }
 
+namespace {
 
+unique_ptr<RustOptions> rust_usage() {
+  cerr << "usage: aidl-rust INPUT_FILE OUTPUT_FILE" << endl
+       << endl
+       << "OPTIONS:" << endl
+       << "   -I<DIR>   search path for import statements" << endl
+       << "   -d<FILE>  generate dependency file" << endl
+       << "   -ninja    generate dependency file in a format ninja "
+          "understands" << endl
+       << endl
+       << "INPUT_FILE:" << endl
+       << "   an aidl interface file" << endl
+       << "OUTPUT_FILE:" << endl
+       << "   path to write generated rust code" << endl;
+  return unique_ptr<RustOptions>(nullptr);
+}
+
+}  // namespace
+
+unique_ptr<RustOptions> RustOptions::Parse(int argc, const char* const* argv) {
+  unique_ptr<RustOptions> options(new RustOptions());
+  int i = 1;
+
+  // Parse flags, all of which start with '-'
+  for ( ; i < argc; ++i) {
+    const size_t len = strlen(argv[i]);
+    const char *s = argv[i];
+    if (s[0] != '-') {
+      break;  // On to the positional arguments.
+    }
+    if (len < 2) {
+      cerr << "Invalid argument '" << s << "'." << endl;
+      return rust_usage();
+    }
+    const string the_rest = s + 2;
+    if (s[1] == 'I') {
+      options->import_paths_.push_back(the_rest);
+    } else if (s[1] == 'd') {
+      options->dep_file_name_ = the_rest;
+    } else if (strcmp(s, "-ninja") == 0) {
+      options->dep_file_ninja_ = true;
+    } else {
+      cerr << "Invalid argument '" << s << "'." << endl;
+      return rust_usage();
+    }
+  }
+
+  // There are exactly three positional arguments.
+  const int remaining_args = argc - i;
+  if (remaining_args != 2) {
+    cerr << "Expected 2 positional arguments but got " << remaining_args << "." << endl;
+    return rust_usage();
+  }
+
+  options->input_file_name_ = argv[i];
+  options->output_file_name_ = argv[i + 1];
+
+  if (!EndsWith(options->input_file_name_, ".aidl")) {
+    cerr << "Expected .aidl file for input but got " << options->input_file_name_ << endl;
+    return rust_usage();
+  }
+
+  return options;
+}
 
 }  // namespace android
 }  // namespace aidl

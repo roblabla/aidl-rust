@@ -37,12 +37,14 @@
 #include "aidl_language.h"
 #include "generate_cpp.h"
 #include "generate_java.h"
+#include "generate_rust.h"
 #include "import_resolver.h"
 #include "logging.h"
 #include "options.h"
 #include "os.h"
 #include "type_cpp.h"
 #include "type_java.h"
+#include "type_rust.h"
 #include "type_namespace.h"
 
 #ifndef O_BINARY
@@ -674,6 +676,31 @@ AidlError load_and_validate_aidl(
 }
 
 } // namespace internals
+
+int compile_aidl_to_rust(const RustOptions& options,
+                        const IoDelegate& io_delegate) {
+  unique_ptr<AidlInterface> interface;
+  std::vector<std::unique_ptr<AidlImport>> imports;
+  unique_ptr<rust::TypeNamespace> types(new rust::TypeNamespace());
+  types->Init();
+  AidlError err = internals::load_and_validate_aidl(
+      std::vector<std::string>{},  // no preprocessed files
+      options.ImportPaths(),
+      options.InputFileName(),
+      io_delegate,
+      types.get(),
+      &interface,
+      &imports);
+  if (err != AidlError::OK) {
+    return 1;
+  }
+
+  /*if (!write_cpp_dep_file(options, *interface, imports, io_delegate)) {
+    return 1;
+  }*/
+
+  return (rust::GenerateRust(options, *types, *interface, io_delegate)) ? 0 : 1;
+}
 
 int compile_aidl_to_cpp(const CppOptions& options,
                         const IoDelegate& io_delegate) {

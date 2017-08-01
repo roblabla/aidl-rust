@@ -49,6 +49,8 @@ int compile_aidl_to_cpp(const CppOptions& options,
                         const IoDelegate& io_delegate);
 int compile_aidl_to_java(const JavaOptions& options,
                          const IoDelegate& io_delegate);
+int compile_aidl_to_rust(const RustOptions& options,
+                        const IoDelegate& io_delegate);
 bool preprocess_aidl(const JavaOptions& options,
                      const IoDelegate& io_delegate);
 

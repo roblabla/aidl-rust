@@ -336,11 +336,17 @@ void Enum::Write(CodeWriter* to) const {
   to->Write("}\n");
 }
 
-ImplItem::ImplItem(const std::string& name)
-    : name_(name) {}
+// TODO: pub(crate), pub(restricted)
+ImplItem::ImplItem(bool vis, const std::string& name)
+    : vis_(vis), name_(name) {}
 
 string ImplItem::GetName() const {
   return name_;
+}
+
+void ImplItem::Write(CodeWriter* to) const {
+  if (vis_)
+    to->Write("pub ");
 }
 
 Arg::Arg(const std::string& name)
@@ -357,12 +363,17 @@ void Arg::Write(CodeWriter* to) const {
   to->Write(",");
 }
 
+MethodImpl::MethodImpl(bool vis, const std::string& name,
+           std::vector<std::unique_ptr<Arg>> args, const std::string& ret)
+    : ImplItem(vis, name), args_(std::move(args)), ret_type_(ret),
+      block_(false) {}
 MethodImpl::MethodImpl(const std::string& name,
            std::vector<std::unique_ptr<Arg>> args, const std::string& ret)
-    : ImplItem(name), args_(std::move(args)), ret_type_(ret),
+    : ImplItem(false, name), args_(std::move(args)), ret_type_(ret),
       block_(false) {}
 
 void MethodImpl::Write(CodeWriter* to) const {
+  ImplItem::Write(to);
   to->Write("fn %s(", GetName().c_str());
   for (const auto& arg : args_) {
     arg->Write(to);

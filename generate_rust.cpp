@@ -91,7 +91,7 @@ vector<unique_ptr<Arg>> BuildArgList(const TypeNamespace& types,
 unique_ptr<ImplItem> DefineClientTransaction(const TypeNamespace& types,
                                              const AidlInterface& interface,
                                              const AidlMethod& method) {
-  unique_ptr<MethodImpl> ret{new MethodImpl{method.GetName(),
+  unique_ptr<MethodImpl> ret{new MethodImpl{true, method.GetName(),
     BuildArgList(types, method), BuildRetType(types, method)}};
 
   Block* b = ret->GetBlock();
@@ -140,13 +140,13 @@ unique_ptr<ImplItem> DefineClientTransaction(const TypeNamespace& types,
 
   if(!interface.IsOneway() && !method.IsOneway()) {
     // reply.read_exception
-    b->AddStmt(new StmtExpr(new Try(new MethodCall("read_exception", new Path("data")))));
+    b->AddStmt(new StmtExpr(new Try(new MethodCall("read_exception", new Path("reply")))));
   }
 
   // let ret = data.read_method()?;
   const Type* return_type = method.GetType().GetLanguageType<Type>();
   if (return_type != types.VoidType()) {
-    unique_ptr<Expr> read = return_type->ReadFromParcel("data");
+    unique_ptr<Expr> read = return_type->ReadFromParcel("reply");
     b->AddStmt(new Local(Local::BYVAL, "ret", unique_ptr<Expr>(new Try(std::move(read)))));
 
     vector<unique_ptr<Expr>> args;

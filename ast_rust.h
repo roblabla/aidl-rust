@@ -405,7 +405,9 @@ class ImplItem : public AstNode {
   virtual ~ImplItem() = default;
 
   std::string GetName() const;
+  void Write(CodeWriter* to) const override;
  private:
+  bool vis_;
   std::string name_;
 
   DISALLOW_COPY_AND_ASSIGN(ImplItem);
@@ -431,6 +433,7 @@ class Arg : public AstNode {
 // fn fn_name(args) -> ret block
 class MethodImpl : public ImplItem {
  public:
+  MethodImpl(bool vis, const std::string& name, std::vector<std::unique_ptr<Arg>> args, const std::string& ret);
   MethodImpl(const std::string& name, std::vector<std::unique_ptr<Arg>> args, const std::string& ret);
 
   Block* GetBlock();
